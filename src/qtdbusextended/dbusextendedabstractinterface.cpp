@@ -177,13 +177,15 @@ QVariant DBusExtendedAbstractInterface::internalPropGet(const char *propname, vo
     if (m_useCache) {
         int propertyIndex = metaObject()->indexOfProperty(propname);
         QMetaProperty metaProperty = metaObject()->property(propertyIndex);
-        return QVariant(metaProperty.userType(), propertyPtr);
+        // Do explicit casting to suppress warnings and errors
+        return QVariant(QMetaType(metaProperty.userType()), propertyPtr);
     }
 
     if (m_sync) {
         QVariant ret = property(propname);
 
-        QMetaType::construct(ret.userType(), propertyPtr, ret.constData());
+        // Do explicit casting to suppress warnings and errors
+        QMetaType(ret.userType()).construct(propertyPtr, ret.constData());
 
         return ret;
     } else {
@@ -217,7 +219,8 @@ QVariant DBusExtendedAbstractInterface::internalPropGet(const char *propname, vo
         // is this metatype registered?
         const char *expectedSignature = "";
         if (int(metaProperty.type()) != QMetaType::QVariant) {
-            expectedSignature = QDBusMetaType::typeToSignature(metaProperty.userType());
+            // Do explicit casting to suppress warnings and errors
+            expectedSignature = QDBusMetaType::typeToSignature(QMetaType(metaProperty.userType()));
             if (0 == expectedSignature) {
                 QString errorMessage =
                     QStringLiteral("Type %1 must be registered with Qt D-Bus "
@@ -233,7 +236,8 @@ QVariant DBusExtendedAbstractInterface::internalPropGet(const char *propname, vo
         }
 
         asyncProperty(propname);
-        return QVariant(metaProperty.userType(), propertyPtr);
+        // Do explicit casting to suppress warnings and errors
+        return QVariant(QMetaType(metaProperty.userType()), propertyPtr);
     }
 }
 
@@ -271,7 +275,8 @@ void DBusExtendedAbstractInterface::internalPropSet(const char *propname, const 
             return;
         }
 
-        QVariant variant = QVariant(metaProperty.type(), propertyPtr);
+        // Do explicit casting to suppress warnings and errors
+        QVariant variant = QVariant(QMetaType(metaProperty.userType()), propertyPtr);
         variant = value;
 
         asyncSetProperty(propname, variant);
@@ -471,16 +476,20 @@ QVariant DBusExtendedAbstractInterface::demarshall(const QString &interface, con
         return value;
     }
 
-    QVariant result = QVariant(metaProperty.userType(), (void*)0);
+    // Do explicit casting to suppress warnings and errors
+    QVariant result = QVariant(QMetaType(metaProperty.userType()), (void*)0);
     QString errorMessage;
-    const char *expectedSignature = QDBusMetaType::typeToSignature(metaProperty.userType());
+
+    // Do explicit casting to suppress warnings and errors
+    const char *expectedSignature = QDBusMetaType::typeToSignature(QMetaType(metaProperty.userType()));
 
     if (value.userType() == qMetaTypeId<QDBusArgument>()) {
         // demarshalling a DBus argument ...
         QDBusArgument dbusArg = value.value<QDBusArgument>();
 
         if (expectedSignature == dbusArg.currentSignature().toLatin1()) {
-            QDBusMetaType::demarshall(dbusArg, metaProperty.userType(), result.data());
+            // Do explicit casting to suppress warnings and errors
+            QDBusMetaType::demarshall(dbusArg, QMetaType(metaProperty.userType()), result.data());
             if (!result.isValid()) {
                 errorMessage = QStringLiteral("Unexpected failure demarshalling "
                                               "upon PropertiesChanged signal arrival "
@@ -501,7 +510,8 @@ QVariant DBusExtendedAbstractInterface::demarshall(const QString &interface, con
                          QString::fromLatin1(expectedSignature));
         }
     } else {
-        const char *actualSignature = QDBusMetaType::typeToSignature(value.userType());
+        // Do explicit casting to suppress warnings and errors
+        const char *actualSignature = QDBusMetaType::typeToSignature(QMetaType(value.userType()));
 
         errorMessage = QStringLiteral("Unexpected `%1' (%2) "
                                       "upon PropertiesChanged signal arrival "

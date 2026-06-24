@@ -3,14 +3,18 @@
 import os
 import glob
 import subprocess
+import sys
+import argparse
 
-dirname = os.path.dirname
-abspath = os.path.abspath
-project_root = "../"
-
-def get_xml_files():
-    xml_dir = os.path.join(project_root, "xml")
-    return (os.path.join(xml_dir, fname) for fname in os.listdir(xml_dir))
+def get_xml_files(xml_dir):
+    if not os.path.isdir(xml_dir):
+        print(f"Warning: XML directory '{xml_dir}' does NOT exist", file=sys.stderr)
+        return []
+    # No project_root here so that we remove the line xml_dir = ...
+    # But the directory may contain things other than XML files,
+    # so only filter out .xml files.
+    return [os.path.join(xml_dir, fname) for fname in os.listdir(xml_dir)
+            if fname.endswith(".xml")]
 
 def xml_to_generated_name(xml_file):
     xml_name = os.path.basename(xml_file)
@@ -20,42 +24,90 @@ def xml_to_class_name(xml_file):
     xml_name = os.path.basename(xml_file)
     return xml_name.replace(".xml", "").split(".")[-1]
 
-def generate_one(xml_file, dest_dir):
-    binary_path = os.path.join(project_root, "bin", "qdbusxml2cpp-fix")
+# I deleted the sources for things like qdbusxml2cpp-fix
+# Because simply I only want a libdframeworkdbus library that is built against Qt6.
+# Hence we need to manually find this tool.
+def find_qdbusxml2cpp():
+    # PATH
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        cur = os.path.join(path, "qdbusxml2cpp-fix")
+        if os.path.isfile(cur) and os.access(cur, os.X_OK):
+            return cur
+
+    # Qt6's qdbusxml2cpp
+    for path in os.environ.get("PATH", "").split(os.pathsep):
+        cur = os.path.join(path, "qdbusxml2cpp")
+        if os.path.isfile(cur) and os.access(cur, os.X_OK):
+            return cur
+
+    return None
+
+def generate_one(xml_file, dest_dir, binary_path):
     generated_name = xml_to_generated_name(xml_file)
     class_name = xml_to_class_name(xml_file)
     file_name = os.path.join(dest_dir, generated_name)
 
     print(binary_path, "-c", class_name, "-p", file_name, xml_file)
-
-    subprocess.call([binary_path, "-c", class_name, "-p", file_name, xml_file])
+    subprocess.check_call([binary_path, "-c", class_name, "-p", file_name, xml_file])
 
 def main():
-    xml_files = get_xml_files()
+    # dd argument support
+    parser = argparse.ArgumentParser(description="Generate D-Bus code from XML")
+    parser.add_argument("--src-dir", default=None,
+                        help="Source directory (default: script directory)")
+    parser.add_argument("--build-dir", default=None,
+                        help="Build directory for generated files (default: src-dir/generated)")
+    parser.add_argument("--xml-dir", default=None,
+                        help="XML files directory (default: src-dir/../xml)")
+    args = parser.parse_args()
 
-    # generate generated code dir
-    generated_dir = "generated"
-    if not os.path.exists(generated_dir):
-        os.mkdir(generated_dir)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    src_dir = args.src_dir or script_dir
+    build_dir = args.build_dir or os.path.join(src_dir, "generated")
+
+    if args.xml_dir:
+        xml_dir = args.xml_dir
     else:
-        for file in glob.glob1(generated_dir, "*"):
-            os.remove(os.path.join(generated_dir, file))
+        xml_dir = os.path.join(os.path.dirname(src_dir), "xml")
 
-    # generate generated.pri
-    generated_pri = os.path.join(os.path.abspath(generated_dir),
-                                "generated.pri")
-    with open(generated_pri, 'w') as pri:
-        print("generating the source code...")
-        for xml in xml_files:
-            generate_one(xml, generated_dir)
+    xml_files = get_xml_files(xml_dir)
 
-        print("generating the pri file...")
-        pwdfy = lambda x: "$$PWD/%s" % x
-        sources = list(map(pwdfy, sorted(glob.glob1(generated_dir, "*.cpp"))))
-        headers = list(map(pwdfy, sorted(glob.glob1(generated_dir, "*.h"))))
-        pri.write("HEADERS += %s\n" % " ".join(headers))
-        pri.write("SOURCES += %s" % " ".join(sources))
-        print("done.")
+    # Ensure build_dir exists
+    os.makedirs(build_dir, exist_ok=True)
+
+    # Clean old things
+    for old_file in glob.glob(os.path.join(build_dir, "*.cpp")) + \
+                    glob.glob(os.path.join(build_dir, "*.h")):
+        os.remove(old_file)
+
+    if xml_files:
+        binary_path = find_qdbusxml2cpp()
+        if not binary_path:
+            print("Error: qdbusxml2cpp-fix or qdbusxml2cpp not found", file=sys.stderr)
+            # Non-fatal error, just simply use them if they are there.
+        else:
+            print("Generating source code from XML files...")
+            for xml in xml_files:
+                generate_one(xml, build_dir, binary_path)
+
+    # Generate generated.cmake
+    generated_cmake = os.path.join(build_dir, "generated.cmake")
+    with open(generated_cmake, 'w') as cmake:
+        sources = sorted(glob.glob(os.path.join(build_dir, "*.cpp")))
+        headers = sorted(glob.glob(os.path.join(build_dir, "*.h")))
+
+        cmake.write("# Auto-generated by generate_code.py\n")
+        cmake.write("set(GENERATED_SOURCES\n")
+        for s in sources:
+            cmake.write(f"    {s}\n")
+        cmake.write(")\n\n")
+        cmake.write("set(GENERATED_HEADERS\n")
+        for h in headers:
+            cmake.write(f"    {h}\n")
+        cmake.write(")\n")
+
+    print("Generated {} source files, {} header files.".format(
+        len(sources), len(headers)))
 
 if __name__ == '__main__':
     main()

@@ -101,6 +101,7 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+build/*
 
 # ---> Bazel
 # gitignore template for Bazel build system
@@ -684,3 +685,9 @@ tags
 # Persistent undo
 [._]*.un~
 
+# ---> Agents
+# CLI
+.claude/*
+.codex/*
+.gemini/*
+.qwen/*
