@@ -1,4 +1,6 @@
 # DFrameworkDBus-Qt6
+> **WARNING · 警告**：This is just a MINIMAL library that is from `gxde-qt-dbus-factory`, we deleted the built in `tools` and `xml` folder for the purpose is to only build the `.so` files. `generate_code.py` may NOT work. - 本库裁剪自`gxde-qt-dbus-factory`，删除了`tools`与`xml`目录，因为最终目的是构建`.so`库。`generate_code.py`可能不会工作
+
 ## 介绍
 Standalone package of current `libdframeworkdbus` building against Qt6.
 

@@ -1,0 +1,35 @@
+Source: libdframeworkdbus-qt6
+Section: libs
+Priority: optional
+Maintainer: CharOfString <markus_verify@126.com>
+Build-Depends:
+    cmake,
+    debhelper-compat (= 13),
+    qt6-base-dev,
+Standards-Version: 4.6.2
+Homepage: https://gitee.com/GXDE-OS/dframework-dbus-qt6
+Rules-Requires-Root: no
+
+Package: libdframeworkdbus-qt6
+Architecture: any
+Multi-Arch: same
+Depends:
+    ${misc:Depends},
+    ${shlibs:Depends},
+Description: Standalone package of current libdframeworkdbus building against Qt6.
+
+Package: libdframeworkdbus-qt6-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends:
+    libdframeworkdbus-qt6 (= ${binary:Version}),
+    qt6-base-dev,
+    ${misc:Depends},
+Description: Deepin D-Bus framework development files (Qt6)
+ libdframeworkdbus provides an extended D-Bus interface with caching
+ and asynchronous property support, used throughout the Deepin/GXDE
+ desktop environment.
+ .
+ This package contains the development headers and CMake configuration
+ files for building against libdframeworkdbus-qt6.

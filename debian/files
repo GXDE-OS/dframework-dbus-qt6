@@ -1,0 +1,4 @@
+libdframeworkdbus-qt6-dbgsym_6.0.0-1_amd64.deb debug optional automatic=yes
+libdframeworkdbus-qt6-dev_6.0.0-1_amd64.deb libdevel optional
+libdframeworkdbus-qt6_6.0.0-1_amd64.buildinfo libs optional
+libdframeworkdbus-qt6_6.0.0-1_amd64.deb libs optional
