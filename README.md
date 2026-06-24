@@ -17,6 +17,16 @@ Note that the package has been renamed:
 * **CMake configuration · CMake配置**: `cmake/DFrameworkdbus`  → `cmake/DFrameworkdbusQt6`
 * **CMake target · CMake目标**: `DFrameworkdbus::dframeworkdbus`  → `DFrameworkdbusQt6::dframeworkdbus_qt6`
 
+## Building | 构建
+```bash
+$ chmod a+x ./build-deb
+$ ./build-deb -d
+```
+
+The artifacts will be in parent folder of project root. You may use `./build-deb -c` to do cleanup.
+
+构建产物在项目根目录的上级目录，对于项目目录，执行`./build-deb -c`以清理。
+
 ## License | 许可证
 This project is licensed under GNU GENERAL PUBLIC LICENSE Version 3, you may find it [here](./LICENSE).
 
