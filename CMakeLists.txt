@@ -7,14 +7,12 @@ set(CMAKE_AUTOMOC ON)
 
 add_compile_options(
     -fstack-protector-strong
-    -D_FORTIFY_SOURCE=1
     -fPIC
 )
 
 add_link_options(
     -Wl,-z,noexecstack
     -Wl,-z,lazy
-    -pie
 )
 
 find_package(Qt6 REQUIRED COMPONENTS DBus)
