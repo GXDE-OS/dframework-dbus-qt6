@@ -39,8 +39,6 @@ QDBusArgument &operator<<(QDBusArgument &argument, const DefenderProcessInfo &pr
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderProcessInfo &procInfo);
 
 typedef QList<DefenderProcessInfo> DefenderProcessInfoList;
-Q_DECLARE_METATYPE(DefenderProcessInfo)
-Q_DECLARE_METATYPE(DefenderProcessInfoList)
 
 void registerDefenderProcessInfoMetaType();
 

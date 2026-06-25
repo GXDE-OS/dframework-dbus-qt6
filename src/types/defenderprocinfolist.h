@@ -25,7 +25,6 @@
 #include "defenderprocinfo.h"
 
 typedef QList<DefenderProcInfo> DefenderProcInfoList;
-Q_DECLARE_METATYPE(DefenderProcInfoList);
 
 void registerDefenderProcInfoListMetaType();
 #endif

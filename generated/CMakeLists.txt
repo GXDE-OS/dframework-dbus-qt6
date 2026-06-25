@@ -48,3 +48,7 @@ if(NOT RESULT_GEN EQUAL 0)
 endif()
 
 include(${CMAKE_CURRENT_BINARY_DIR}/generated.cmake)
+
+# Needed by root CMAKELists.txt to install those
+set(GENERATED_SOURCES ${GENERATED_SOURCES} PARENT_SCOPE)
+set(GENERATED_HEADERS ${GENERATED_HEADERS} PARENT_SCOPE)

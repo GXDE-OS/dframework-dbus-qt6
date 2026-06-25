@@ -67,7 +67,6 @@ struct DefenderProcInfo {
     }
 };
 
-Q_DECLARE_METATYPE(DefenderProcInfo);
 
 QDBusArgument &operator<<(QDBusArgument &argument, const DefenderProcInfo &procInfo);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderProcInfo &procInfo);

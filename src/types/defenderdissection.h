@@ -16,7 +16,6 @@ struct DefenderDissection
     bool operator!=(const DefenderDissection &dissectionInfo);
 };
 
-Q_DECLARE_METATYPE(DefenderDissection)
 
 QDBusArgument &operator<<(QDBusArgument &argument, const DefenderDissection &dissectionInfo);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderDissection &dissectionInfo);

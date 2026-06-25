@@ -363,15 +363,23 @@ static QString dbusSignatureToQtType(const QString &sig) {
     if (sig == "ay") return "QByteArray";
     if (sig == "a{sv}") return "QVariantMap";
     if (sig == "a{ss}") return "QMap<QString,QString>";
-    // Complex/annotated types - just use the signature as-is
+    if (sig == "ao") return "QList<QDBusObjectPath>";
+    if (sig == "ab") return "QList<bool>";
+    if (sig == "ai") return "QList<int>";
+    if (sig == "au") return "QList<uint>";
+    if (sig == "ad") return "QList<double>";
+    // Complex/annotated types — try annotation, fallback to QDBusArgument
     return QString();
 }
 
 static QByteArray qtTypeName(const QString &signature, const QDBusIntrospection::Annotations &annotations, int paramId = -1, const char *direction = "Out")
 {
     QString qtSig = dbusSignatureToQtType(signature);
-    int type = qtSig.isEmpty() ? QMetaType::UnknownType : QMetaType::fromName(qtSig.toLatin1()).id();
-    if (type == QVariant::Invalid) {
+    if (!qtSig.isEmpty())
+        return qtSig.toLatin1();
+
+    // Unknown signature — try annotations
+    {
         QString annotationName = QString::fromLatin1("org.qtproject.QtDBus.QtTypeName");
         if (paramId >= 0)
             annotationName += QString::fromLatin1(".%1%2").arg(QLatin1String(direction)).arg(paramId);
@@ -385,10 +393,8 @@ static QByteArray qtTypeName(const QString &signature, const QDBusIntrospection:
         qttype = annotations.value(oldAnnotationName).value;
 
         if (qttype.isEmpty()) {
-            fprintf(stderr, "Got unknown type `%s'\n", qPrintable(signature));
-            fprintf(stderr, "You should add <annotation name=\"%s\" value=\"<type>\"/> to the XML description\n",
-                    qPrintable(annotationName));
-            return QByteArray();
+            fprintf(stderr, "Warning: unknown type '%s', using QDBusArgument as fallback\n", qPrintable(signature));
+            return QByteArray("QDBusArgument");
         }
 
         fprintf(stderr, "Warning: deprecated annotation '%s' found; suggest updating to '%s'\n",
@@ -396,7 +402,7 @@ static QByteArray qtTypeName(const QString &signature, const QDBusIntrospection:
         return qttype.toLatin1();
     }
 
-    return QVariant::typeToName(QVariant::Type(type));
+    return QByteArray();
 }
 
 static QString nonConstRefArg(const QByteArray &arg)
@@ -638,7 +644,7 @@ static void writeProxy(const QString &filename, const QDBusIntrospection::Interf
             for (int i(0); i != method.outputArgs.size(); ++i)
             {
                 const QDBusIntrospection::Argument &arg = method.outputArgs[i];
-                if (QMetaType::fromName(dbusSignatureToQtType(arg.type).toLatin1()).id() != QVariant::Invalid)
+                if (!dbusSignatureToQtType(arg.type).isEmpty())
                     continue;
 
                 annotations << qtTypeName(arg.type, method.annotations, i, "Out");
@@ -647,7 +653,7 @@ static void writeProxy(const QString &filename, const QDBusIntrospection::Interf
             for (int i(0); i != method.inputArgs.size(); ++i)
             {
                 const QDBusIntrospection::Argument &arg = method.inputArgs[i];
-                if (QMetaType::fromName(dbusSignatureToQtType(arg.type).toLatin1()).id() != QVariant::Invalid)
+                if (!dbusSignatureToQtType(arg.type).isEmpty())
                     continue;
 
                 annotations << qtTypeName(arg.type, method.annotations, i, "In");
@@ -656,15 +662,23 @@ static void writeProxy(const QString &filename, const QDBusIntrospection::Interf
 
         for (const auto property : interface->properties)
         {
-            if (QMetaType::fromName(dbusSignatureToQtType(property.type).toLatin1()).id() != QVariant::Invalid)
+            if (!dbusSignatureToQtType(property.type).isEmpty())
                 continue;
 
             annotations << qtTypeName(property.type, property.annotations);
         }
     }
 
+
+    // Qt6: list of built-in types that don't need custom <types/...> includes
+    static const QSet<QString> builtinTypes = {
+        "QDBusArgument", "QDBusObjectPath", "QDBusSignature", "QDBusVariant",
+        "QVariant", "QByteArray", "QStringList", "QVariantMap",
+        "QMap<QString,QString>"
+    };
+
     for (const QString &annotation : annotations) {
-        if (annotation.indexOf('<')==-1) {
+        if (annotation.indexOf('<')==-1 && !builtinTypes.contains(annotation)) {
             hs << "#include \"types/" << annotation.toLower() << ".h\"" << Qt::endl;
         }
     }
@@ -735,7 +749,17 @@ static void writeProxy(const QString &filename, const QDBusIntrospection::Interf
         if (!interface->properties.isEmpty())
             cs   << "    connect(this, &" << className << "::propertyChanged, this, &" << className << "::onPropertyChanged);" << Qt::endl << Qt::endl;
 
-        for (const QString &annotation : annotations) {
+    
+    // Qt6: list of built-in types that don't need custom <types/...> includes
+    static const QSet<QString> builtinTypes = {
+        "QDBusArgument", "QDBusObjectPath", "QDBusSignature", "QDBusVariant",
+        "QVariant", "QByteArray", "QStringList", "QVariantMap",
+        "QMap<QString,QString>"
+    };
+
+    for (const QString &annotation : annotations) {
+            if (builtinTypes.contains(annotation))
+                continue;
             if(annotation.indexOf('<')!=-1) {
                 cs << "    if (QMetaType::type(\"" << annotation << "\") == QMetaType::UnknownType) {" << Qt::endl;
                 cs << "        qRegisterMetaType< " << annotation << " >(\"" << annotation << "\");" << Qt::endl;
@@ -774,7 +798,8 @@ static void writeProxy(const QString &filename, const QDBusIntrospection::Interf
                 cs << "    if (propName == QStringLiteral(\"" << property.name << "\"))" << Qt::endl;
                 cs << "    {" << Qt::endl;
                 cs << "        const " << type << " &" << property.name << " = qvariant_cast<" << type << ">(value);" << Qt::endl;
-                cs << "        " << "if (d_ptr->" << property.name << " != " << property.name << ")" << Qt::endl;
+                cs << "        " << "// Always notify on property change (operator!= may not exist for custom types)" << Qt::endl;
+                cs << "        " << "Q_UNUSED(" << property.name << ");" << Qt::endl;
                 cs << "        {" << Qt::endl;
                 cs << "            d_ptr->" << property.name << " = " << property.name << ';' << Qt::endl;
                 cs << "            Q_EMIT " << name << "Changed(d_ptr->" << property.name << ");" << Qt::endl;

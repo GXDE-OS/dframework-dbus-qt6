@@ -32,7 +32,6 @@ struct DefenderVersionInfo
     bool operator!=(const DefenderVersionInfo &versionInfo);
 };
 
-Q_DECLARE_METATYPE(DefenderVersionInfo)
 
 QDBusArgument &operator<<(QDBusArgument &argument, const DefenderVersionInfo &versionInfo);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderVersionInfo &versionInfo);

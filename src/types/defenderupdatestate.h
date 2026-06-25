@@ -15,7 +15,6 @@ struct DefenderUpdateState
     bool operator!=(const DefenderUpdateState &updateState);
 };
 
-Q_DECLARE_METATYPE(DefenderUpdateState)
 
 QDBusArgument &operator<<(QDBusArgument &argument, const DefenderUpdateState &updateState);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderUpdateState &updateState);

@@ -42,10 +42,8 @@ struct DefenderDisplay {
     bool status;
     bool operator!=(const DefenderDisplay &display);
 };
-Q_DECLARE_METATYPE(DefenderDisplay);
 
 typedef QList<DefenderDisplay> DefenderDisplayList;
-Q_DECLARE_METATYPE(DefenderDisplayList);
 
 QDBusArgument &operator<<(QDBusArgument &argument, const DefenderDisplay &defenderdisplay);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderDisplay &defenderdisplay);

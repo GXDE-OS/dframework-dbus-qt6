@@ -38,10 +38,8 @@ struct DefenderAppFlow {
     bool operator!=(const DefenderAppFlow &appFlow);
 };
 
-Q_DECLARE_METATYPE(DefenderAppFlow);
 //DefenderAppFlowList注册
 typedef QList<DefenderAppFlow> DefenderAppFlowList;
-Q_DECLARE_METATYPE(DefenderAppFlowList);
 
 QDBusArgument &operator<<(QDBusArgument &argument, const DefenderAppFlow &appFlow);
 const QDBusArgument &operator>>(const QDBusArgument &argument, DefenderAppFlow &appFlow);

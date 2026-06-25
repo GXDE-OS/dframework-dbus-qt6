@@ -29,7 +29,6 @@
 
 //save all process's pid
 typedef QList<int> DefenderProcessList;
-Q_DECLARE_METATYPE(DefenderProcessList);
 
 void registerDefenderProcessListMetaType();
 
