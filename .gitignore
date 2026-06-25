@@ -692,3 +692,8 @@ tags
 .codex/*
 .gemini/*
 .qwen/*
+
+# ---> Tools
+gxde-qdbusxml2cpp
+build-tool/
+!./generates/CMakeLists.txt

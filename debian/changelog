@@ -1,4 +1,11 @@
-libdframeworkdbus-qt6 (6.0.0-1) unstable; urgency=medium
+libdframeworkdbus-qt6 (6.0.1-gxde1) unstable; urgency=medium
+
+  * Added gxde-qdbusxml2cpp from upstream.
+  * Added XMLs from upstream.
+
+ -- CharOfString <markus_verify@126.com>  Thu, 25 Jun 2026 01:10:23 +0800
+
+libdframeworkdbus-qt6 (6.0.0-gxde1) unstable; urgency=medium
 
   * Build against Qt6.
   * SO version bumped to 6, please refer to README.

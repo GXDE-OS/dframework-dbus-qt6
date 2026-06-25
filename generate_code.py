@@ -24,17 +24,38 @@ def xml_to_class_name(xml_file):
     xml_name = os.path.basename(xml_file)
     return xml_name.replace(".xml", "").split(".")[-1]
 
-# I deleted the sources for things like qdbusxml2cpp-fix
+# I deleted the sources for things like gxde-qdbusxml2cpp
 # Because simply I only want a libdframeworkdbus library that is built against Qt6.
 # Hence we need to manually find this tool.
-def find_qdbusxml2cpp():
-    # PATH
+def find_qdbusxml2cpp(build_dir=None):
+    # 1. Built specific patched gxde-qdbusxml2cpp
+    if build_dir:
+        # Search ./ ../ ../../../ for the target
+        # You don't know where the user's terminal is at
+        search_dirs = [build_dir]
+        p = build_dir
+        for _ in range(3):
+            p = os.path.dirname(p)
+            if p:
+                search_dirs.append(p)
+        for d in search_dirs:
+            cur = os.path.join(d, "gxde-qdbusxml2cpp")
+            if os.path.isfile(cur) and os.access(cur, os.X_OK):
+                # FOUND!!
+                return cur
+
+    # 2. PATH search for gxde-qdbusxml2cpp
     for path in os.environ.get("PATH", "").split(os.pathsep):
-        cur = os.path.join(path, "qdbusxml2cpp-fix")
+        cur = os.path.join(path, "gxde-qdbusxml2cpp")
         if os.path.isfile(cur) and os.access(cur, os.X_OK):
             return cur
 
-    # Qt6's qdbusxml2cpp
+    # Qt6 original, may fail compilation of those XMLs for they actually lack our patches.
+    qt6_path = "/usr/lib/qt6/bin/qdbusxml2cpp"
+    if os.path.isfile(qt6_path) and os.access(qt6_path, os.X_OK):
+        return qt6_path
+
+    # Generic qdbusxml2cpp, may fail with same reason above plus may fail if QSELECT does not set Qt6 EXPLICITLY.
     for path in os.environ.get("PATH", "").split(os.pathsep):
         cur = os.path.join(path, "qdbusxml2cpp")
         if os.path.isfile(cur) and os.access(cur, os.X_OK):
@@ -81,9 +102,9 @@ def main():
         os.remove(old_file)
 
     if xml_files:
-        binary_path = find_qdbusxml2cpp()
+        binary_path = find_qdbusxml2cpp(build_dir)
         if not binary_path:
-            print("Error: qdbusxml2cpp-fix or qdbusxml2cpp not found", file=sys.stderr)
+            print("Error: gxde-qdbusxml2cpp or qdbusxml2cpp not found", file=sys.stderr)
             # Non-fatal error, just simply use them if they are there.
         else:
             print("Generating source code from XML files...")
