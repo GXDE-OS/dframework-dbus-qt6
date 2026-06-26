@@ -20,11 +20,9 @@ target_link_libraries(gxde-qdbusxml2cpp PRIVATE
 )
 
 # Access dbus and core private headers
-target_include_directories(gxde-qdbusxml2cpp PRIVATE
-    /usr/include/x86_64-linux-gnu/qt6/QtCore/${Qt6_VERSION}/QtCore
-    /usr/include/x86_64-linux-gnu/qt6/QtCore/${Qt6_VERSION}
-    /usr/include/x86_64-linux-gnu/qt6/QtDBus/${Qt6_VERSION}/QtDBus
-    /usr/include/x86_64-linux-gnu/qt6/QtDBus/${Qt6_VERSION}
+target_link_libraries(gxde-qdbusxml2cpp PRIVATE
+    Qt6::CorePrivate
+    Qt6::DBusPrivate
 )
 
 set_target_properties(gxde-qdbusxml2cpp PROPERTIES
