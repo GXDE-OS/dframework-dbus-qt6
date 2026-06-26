@@ -6,6 +6,7 @@ Build-Depends:
     cmake,
     debhelper-compat (= 13),
     qt6-base-dev,
+    qt6-base-private-dev,
 Standards-Version: 4.6.2
 Homepage: https://gitee.com/GXDE-OS/dframework-dbus-qt6
 Rules-Requires-Root: no
