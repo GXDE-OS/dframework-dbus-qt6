@@ -13,7 +13,7 @@ Note that the package has been renamed:
 * **Library name · 库名称**: `libdframeworkdbus.so`  → `libdframeworkdbus-qt6.so`
 * **Header file path · 头文件路径**: `libdframeworkdbus-2.0`  → `libdframeworkdbus-qt6-6.0`
 * **CMake configuration · CMake配置**: `cmake/DFrameworkdbus`  → `cmake/DFrameworkdbusQt6`
-* **CMake target · CMake目标**: `DFrameworkdbus::dframeworkdbus`  → `DFrameworkdbusQt6::dframeworkdbus_qt6`
+* **CMake target · CMake目标**: `DFrameworkdbus::dframeworkdbus`  → `DFrameworkdbusQt6::DFrameworkdbusQt6`
 
 ## Building | 构建
 ```bash
