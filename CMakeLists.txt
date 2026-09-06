@@ -15,7 +15,7 @@ add_link_options(
     -Wl,-z,lazy
 )
 
-find_package(Qt6 REQUIRED COMPONENTS DBus)
+find_package(Qt6 REQUIRED COMPONENTS Core DBus)
 
 add_subdirectory(generated)
 

@@ -10,6 +10,15 @@ project(gxde-qdbusxml2cpp LANGUAGES CXX)
 
 find_package(Qt6 REQUIRED COMPONENTS Core DBus)
 
+# Qt packaging either exports private targets with the public components or
+# provides them as separate packages. Support both layouts.
+if(NOT TARGET Qt6::CorePrivate)
+    find_package(Qt6CorePrivate REQUIRED)
+endif()
+if(NOT TARGET Qt6::DBusPrivate)
+    find_package(Qt6DBusPrivate REQUIRED)
+endif()
+
 add_executable(gxde-qdbusxml2cpp
     qdbusxml2cpp.cpp
 )
