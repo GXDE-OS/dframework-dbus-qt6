@@ -1,0 +1,38 @@
+# Maintainer: CharOfString <root@charofstring.cc>
+pkgname=dframework-dbus-qt6-git
+pkgver=6.0.1
+pkgrel=1
+pkgdesc='GXDE D-Bus framework library built against Qt6 (libdframeworkdbus-qt6)'
+arch=('x86_64' 'aarch64')
+url="https://github.com/GXDE-OS/dframework-dbus-qt6"
+license=('GPL-3.0-or-later')
+depends=('qt6-base' 'libgcc' 'libstdc++' 'glibc')
+makedepends=('git' 'cmake' 'ninja')
+provides=("dframework-dbus-qt6=$pkgver")
+conflicts=('dframework-dbus-qt6')
+source=()
+sha512sums=()
+
+# 直接使用 PKGBUILD 所在的 git 仓库作为源码 ・ Build from the git checkout this PKGBUILD lives in.
+_srcroot() {
+  git -C "$startdir" rev-parse --show-toplevel
+}
+
+build() {
+  # CMake 把打过补丁的 gxde-qdbusxml2cpp 放在源码根目录，generate_code.py 只向上找三层，
+  # 从 arch/src/build/generated 找不到，会退回到无法解析这些 XML 的 Qt 原版，因此加入 PATH
+  # CMake puts the patched gxde-qdbusxml2cpp in the source root, while
+  # generate_code.py only searches three levels up and cannot reach it from
+  # arch/src/build/generated, falling back to the stock Qt tool that rejects
+  # these XMLs.  Put it on PATH instead.
+  export PATH="$(_srcroot):$PATH"
+  cmake -B build -S "$(_srcroot)" -GNinja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_LIBDIR=lib
+  ninja -C build
+}
+
+package() {
+  DESTDIR="$pkgdir" ninja -C build install
+}
