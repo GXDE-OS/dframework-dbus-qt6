@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@/libdframeworkdbus-qt6-@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@
+
+Name: DFrameworkdbusQt6
+Description: Deepin D-Bus framework library (Qt6)
+Version: @PROJECT_VERSION@
+Requires: Qt6DBus
+Libs: -L${libdir} -ldframeworkdbus-qt6
+Cflags: -I${includedir}
