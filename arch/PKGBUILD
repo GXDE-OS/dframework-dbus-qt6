@@ -1,5 +1,5 @@
 # Maintainer: CharOfString <root@charofstring.cc>
-pkgname=dframework-dbus-qt6-git
+pkgname=dframework-dbus-qt6
 pkgver=6.0.1
 pkgrel=1
 pkgdesc='GXDE D-Bus framework library built against Qt6 (libdframeworkdbus-qt6)'
@@ -8,8 +8,9 @@ url="https://github.com/GXDE-OS/dframework-dbus-qt6"
 license=('GPL-3.0-or-later')
 depends=('qt6-base' 'libgcc' 'libstdc++' 'glibc')
 makedepends=('git' 'cmake' 'ninja')
-provides=("dframework-dbus-qt6=$pkgver")
-conflicts=('dframework-dbus-qt6')
+provides=("dframework-dbus-qt6-git=$pkgver")
+conflicts=('dframework-dbus-qt6-git')
+replaces=('dframework-dbus-qt6-git')
 source=()
 sha512sums=()
 
