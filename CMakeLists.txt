@@ -244,3 +244,13 @@ install(EXPORT DFrameworkdbusQt6Targets
     NAMESPACE DFrameworkdbusQt6::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/DFrameworkdbusQt6
 )
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/dframeworkdbus-qt6.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dframeworkdbus-qt6.pc
+    @ONLY
+)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dframeworkdbus-qt6.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)

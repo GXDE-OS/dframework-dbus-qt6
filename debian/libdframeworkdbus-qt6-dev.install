@@ -1,3 +1,4 @@
 usr/include/libdframeworkdbus-qt6-6.0/
 usr/lib/*/libdframeworkdbus-qt6.so
 usr/lib/*/cmake/DFrameworkdbusQt6/
+usr/lib/*/pkgconfig/dframeworkdbus-qt6.pc
